@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { HelpCircle, RotateCcw, Lightbulb, Stethoscope, Share2 } from "lucide-react"
+import { HelpCircle, RotateCcw, Lightbulb, Stethoscope, Share2, SkipForward } from "lucide-react"
 
 // ---------- Types ----------
 type GuessResult = "correct" | "present" | "absent"
@@ -452,8 +452,23 @@ export default function MedicalWordle() {
             <Button
               variant="outline"
               size="icon"
+              onClick={() => {
+                if (gameState.gameStatus === "playing") {
+                  startNewGame(gameState.selectedSystem!)
+                }
+              }}
+              className="hover:scale-110 transition-transform duration-200"
+              title="Skip Word"
+            >
+              <SkipForward className="h-4 w-4" />
+            </Button>
+
+            <Button
+              variant="outline"
+              size="icon"
               onClick={() => setGameState((prev: GameState) => ({ ...prev, selectedSystem: null }))}
               className="hover:scale-110 transition-transform duration-200"
+              title="Change System"
             >
               <RotateCcw className="h-4 w-4" />
             </Button>
@@ -477,7 +492,7 @@ export default function MedicalWordle() {
                 const guess = gameState.guesses[rowIndex]
                 const isCurrentRow = rowIndex === gameState.guesses.length && gameState.gameStatus === "playing"
                 const letter = guess ? guess[colIndex] : isCurrentRow ? gameState.currentGuess[colIndex] ?? "" : ""
-                const status: GuessResult | null = guess ? getLetterStatus(guess[colIndex], colIndex, guess) : null
+                const status: GuessResult | null = guess ? getLetterStatus(letter, colIndex, guess) : null
                 const isRevealed = Boolean(guess && rowIndex < gameState.guesses.length)
 
                 return (
