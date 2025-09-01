@@ -387,53 +387,53 @@ export default function MedicalWordle() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-screen bg-background p-2 sm:p-4">
       <div className="max-w-md mx-auto animate-in fade-in-50 slide-in-from-top-4 duration-500">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
             <div className="flex items-center gap-2">
-              <Stethoscope className="h-6 w-6 text-primary" />
-              <h1 className="text-2xl font-bold text-primary">Docdle</h1>
+              <Stethoscope className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              <h1 className="text-xl sm:text-2xl font-bold text-primary">Docdle</h1>
             </div>
-            <div className="flex gap-2 mt-1 items-center">
-              <Badge variant="secondary" className="capitalize animate-in fade-in-50 delay-100">
+            <div className="flex gap-1 sm:gap-2 mt-1 items-center">
+              <Badge variant="secondary" className="capitalize animate-in fade-in-50 delay-100 text-xs sm:text-sm">
                 {gameState.selectedSystem?.replace(/([A-Z])/g, " $1").trim()}
               </Badge>
-              <Badge className={`${difficultyColor[gameState.currentDifficulty]} capitalize animate-in fade-in-50 delay-200`}>
+              <Badge className={`${difficultyColor[gameState.currentDifficulty]} capitalize animate-in fade-in-50 delay-200 text-xs sm:text-sm`}>
                 {gameState.currentDifficulty}
               </Badge>
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-1 sm:gap-2">
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" size="icon" className="hover:scale-110 transition-transform duration-200 bg-transparent">
-                  <HelpCircle className="h-4 w-4" />
+                <Button variant="outline" size="icon" className="hover:scale-110 transition-transform duration-200 bg-transparent h-8 w-8 sm:h-10 sm:w-10">
+                  <HelpCircle className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </DialogTrigger>
-              <DialogContent className="animate-in fade-in-50 slide-in-from-bottom-4 duration-300">
+              <DialogContent className="animate-in fade-in-50 slide-in-from-bottom-4 duration-300 max-w-sm mx-4">
                 <DialogHeader>
-                  <DialogTitle>How to Play</DialogTitle>
+                  <DialogTitle className="text-lg">How to Play</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-3 text-sm">
                   <p>Guess the medical term in 6 tries or less!</p>
                   <div className="space-y-2">
                     {/* Correct = GREEN */}
                     <div className="flex items-center gap-2 animate-in fade-in-50 slide-in-from-left-4 delay-100">
-                      <div className="w-8 h-8 bg-green-500 text-white rounded flex items-center justify-center font-bold">A</div>
-                      <span>Correct letter in correct position</span>
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500 text-white rounded flex items-center justify-center font-bold text-sm sm:text-base">A</div>
+                      <span className="text-xs sm:text-sm">Correct letter in correct position</span>
                     </div>
                     {/* Present = YELLOW */}
                     <div className="flex items-center gap-2 animate-in fade-in-50 slide-in-from-left-4 delay-200">
-                      <div className="w-8 h-8 bg-yellow-400 text-black rounded flex items-center justify-center font-bold">B</div>
-                      <span>Correct letter in wrong position</span>
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 bg-yellow-400 text-black rounded flex items-center justify-center font-bold text-sm sm:text-base">B</div>
+                      <span className="text-xs sm:text-sm">Correct letter in wrong position</span>
                     </div>
                     {/* Absent = GRAY */}
                     <div className="flex items-center gap-2 animate-in fade-in-50 slide-in-from-left-4 delay-300">
-                      <div className="w-8 h-8 bg-muted text-muted-foreground rounded flex items-center justify-center font-bold">C</div>
-                      <span>Letter not in word</span>
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 bg-muted text-muted-foreground rounded flex items-center justify-center font-bold text-sm sm:text-base">C</div>
+                      <span className="text-xs sm:text-sm">Letter not in word</span>
                     </div>
                   </div>
                 </div>
@@ -444,9 +444,9 @@ export default function MedicalWordle() {
               variant="outline"
               size="icon"
               onClick={() => setShowHint((prev) => !prev)}
-              className={`hover:scale-110 transition-all duration-200 ${showHint ? "bg-accent text-accent-foreground" : ""}`}
+              className={`hover:scale-110 transition-all duration-200 h-8 w-8 sm:h-10 sm:w-10 ${showHint ? "bg-accent text-accent-foreground" : ""}`}
             >
-              <Lightbulb className="h-4 w-4" />
+              <Lightbulb className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
 
             <Button
@@ -457,35 +457,35 @@ export default function MedicalWordle() {
                   startNewGame(gameState.selectedSystem!)
                 }
               }}
-              className="hover:scale-110 transition-transform duration-200"
+              className="hover:scale-110 transition-transform duration-200 h-8 w-8 sm:h-10 sm:w-10"
               title="Skip Word"
             >
-              <SkipForward className="h-4 w-4" />
+              <SkipForward className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
 
             <Button
               variant="outline"
               size="icon"
               onClick={() => setGameState((prev: GameState) => ({ ...prev, selectedSystem: null }))}
-              className="hover:scale-110 transition-transform duration-200"
+              className="hover:scale-110 transition-transform duration-200 h-8 w-8 sm:h-10 sm:w-10"
               title="Change System"
             >
-              <RotateCcw className="h-4 w-4" />
+              <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </div>
 
         {/* Hint */}
         {showHint && (
-          <Card className="p-3 mb-4 bg-accent/10 animate-in fade-in-50 slide-in-from-top-2 duration-300">
-            <p className="text-sm text-center">
+          <Card className="p-2 sm:p-3 mb-3 sm:mb-4 bg-accent/10 animate-in fade-in-50 slide-in-from-top-2 duration-300">
+            <p className="text-xs sm:text-sm text-center">
               <strong>Hint:</strong> {gameState.currentHint || "—"}
             </p>
           </Card>
         )}
 
         {/* Game Grid */}
-        <div className="flex flex-col items-center gap-2 mb-6">
+        <div className="flex flex-col items-center gap-1 sm:gap-2 mb-4 sm:mb-6">
           {Array.from({ length: 6 }, (_, rowIndex) => (
             <div key={rowIndex} className={`flex gap-2 ${shakeRow === rowIndex ? "animate-bounce" : ""}`}>
               {Array.from({ length: gameState.currentWord.length || 5 }, (_, colIndex) => {
@@ -499,7 +499,7 @@ export default function MedicalWordle() {
                   <div
                     key={colIndex}
                     className={`
-                      w-12 h-12 border-2 rounded flex items-center justify-center font-bold text-lg
+                      w-10 h-10 sm:w-12 sm:h-12 border-2 rounded flex items-center justify-center font-bold text-base sm:text-lg
                       transition-all duration-300 hover:scale-105
                       ${
                         status === "correct"
@@ -525,28 +525,28 @@ export default function MedicalWordle() {
 
         {/* Game Status */}
         {gameState.gameStatus !== "playing" && (
-          <Card className="p-4 text-center mb-4 animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
+          <Card className="p-3 sm:p-4 text-center mb-3 sm:mb-4 animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
             {gameState.gameStatus === "won" ? (
               <div className="text-primary">
-                <h3 className="font-bold text-lg animate-in zoom-in-50 duration-300">Congratulations!</h3>
-                <p className="animate-in fade-in-50 delay-200">
+                <h3 className="font-bold text-base sm:text-lg animate-in zoom-in-50 duration-300">Congratulations!</h3>
+                <p className="animate-in fade-in-50 delay-200 text-sm sm:text-base">
                   You guessed the word: <strong>{gameState.currentWord}</strong>
                 </p>
               </div>
             ) : (
               <div className="text-destructive">
-                <h3 className="font-bold text-lg animate-in zoom-in-50 duration-300">Game Over</h3>
-                <p className="animate-in fade-in-50 delay-200">
+                <h3 className="font-bold text-base sm:text-lg animate-in zoom-in-50 duration-300">Game Over</h3>
+                <p className="animate-in fade-in-50 delay-200 text-sm sm:text-base">
                   The word was: <strong>{gameState.currentWord}</strong>
                 </p>
               </div>
             )}
             <div className="flex gap-2 justify-center mt-3">
-              <Button onClick={() => startNewGame(gameState.selectedSystem!)} className="hover:scale-105 transition-transform duration-200 animate-in fade-in-50 delay-300">
+              <Button onClick={() => startNewGame(gameState.selectedSystem!)} className="hover:scale-105 transition-transform duration-200 animate-in fade-in-50 delay-300 text-sm">
                 Play Again
               </Button>
-              <Button variant="outline" onClick={shareResults} className="hover:scale-105 transition-transform duration-200 animate-in fade-in-50 delay-300 bg-transparent">
-                <Share2 className="h-4 w-4 mr-2" />
+              <Button variant="outline" onClick={shareResults} className="hover:scale-105 transition-transform duration-200 animate-in fade-in-50 delay-300 bg-transparent text-sm">
+                <Share2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                 Share
               </Button>
             </div>
@@ -554,11 +554,11 @@ export default function MedicalWordle() {
         )}
 
         {/* Virtual Keyboard */}
-        <div className="space-y-2">
+        <div className="space-y-1 sm:space-y-2">
           {["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"].map((row, rowIndex) => (
-            <div key={rowIndex} className="flex gap-1 justify-center">
+            <div key={rowIndex} className="flex gap-0.5 sm:gap-1 justify-center">
               {rowIndex === 2 && (
-                <Button variant="outline" size="sm" onClick={() => handleKeyPress("ENTER")} className="px-3 hover:scale-105 transition-all duration-200 text-xs">
+                <Button variant="outline" size="sm" onClick={() => handleKeyPress("ENTER")} className="px-2 sm:px-3 hover:scale-105 transition-all duration-200 text-xs">
                   ENTER
                 </Button>
               )}
@@ -571,7 +571,7 @@ export default function MedicalWordle() {
                     size="sm"
                     onClick={() => handleKeyPress(letter)}
                     className={`
-                      w-8 h-8 p-0 text-xs font-bold transition-all duration-200 hover:scale-110
+                      w-7 h-7 sm:w-8 sm:h-8 p-0 text-xs font-bold transition-all duration-200 hover:scale-110
                       ${
                         keyStatus === "correct"
                           ? "bg-green-500 text-white border-green-500"
@@ -588,7 +588,7 @@ export default function MedicalWordle() {
                 )
               })}
               {rowIndex === 2 && (
-                <Button variant="outline" size="sm" onClick={() => handleKeyPress("BACKSPACE")} className="px-3 hover:scale-105 transition-all duration-200 text-xs">
+                <Button variant="outline" size="sm" onClick={() => handleKeyPress("BACKSPACE")} className="px-2 sm:px-3 hover:scale-105 transition-all duration-200 text-xs">
                   ⌫
                 </Button>
               )}
