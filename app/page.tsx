@@ -299,12 +299,34 @@ export default function MedicalWordle() {
   // Physical keyboard events
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter") handleKeyPress("ENTER")
-      else if (e.key === "Backspace") handleKeyPress("BACKSPACE")
-      else if (/^[a-zA-Z]$/.test(e.key)) handleKeyPress(e.key.toUpperCase())
+      // Debug: log all key events
+      console.log("Key pressed:", e.key, "Game status:", gameState.gameStatus)
+      
+      // Only handle keys when game is active
+      if (gameState.gameStatus !== "playing") return
+      
+      // Handle game keys
+      if (e.key === "Enter") {
+        e.preventDefault()
+        console.log("Handling ENTER key")
+        handleKeyPress("ENTER")
+      } else if (e.key === "Backspace") {
+        e.preventDefault()
+        console.log("Handling BACKSPACE key")
+        handleKeyPress("BACKSPACE")
+      } else if (/^[a-zA-Z]$/.test(e.key)) {
+        e.preventDefault()
+        console.log("Handling letter key:", e.key.toUpperCase())
+        handleKeyPress(e.key.toUpperCase())
+      }
     }
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
+    
+    // Use passive: false to ensure preventDefault works on mobile
+    window.addEventListener("keydown", handleKeyDown, { passive: false })
+    
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState.gameStatus, gameState.guesses.length, gameState.currentGuess, gameState.currentWord])
 
@@ -387,7 +409,18 @@ export default function MedicalWordle() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-2 sm:p-4">
+    <div 
+      className="min-h-screen bg-background p-2 sm:p-4"
+      tabIndex={0}
+      onFocus={() => {}}
+      onBlur={() => {}}
+      onClick={(e) => {
+        // Ensure the container gets focus when clicked on mobile
+        if (e.currentTarget === e.target) {
+          e.currentTarget.focus()
+        }
+      }}
+    >
       <div className="max-w-md mx-auto animate-in fade-in-50 slide-in-from-top-4 duration-500">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -485,9 +518,9 @@ export default function MedicalWordle() {
         )}
 
         {/* Game Grid */}
-        <div className="flex flex-col items-center gap-1 sm:gap-2 mb-4 sm:mb-6">
+        <div className="flex flex-col items-center gap-1 sm:gap-2 mb-4 sm:mb-6 w-full">
           {Array.from({ length: 6 }, (_, rowIndex) => (
-            <div key={rowIndex} className={`flex gap-2 ${shakeRow === rowIndex ? "animate-bounce" : ""}`}>
+            <div key={rowIndex} className={`flex gap-1 sm:gap-2 justify-center w-full ${shakeRow === rowIndex ? "animate-bounce" : ""}`}>
               {Array.from({ length: gameState.currentWord.length || 5 }, (_, colIndex) => {
                 const guess = gameState.guesses[rowIndex]
                 const isCurrentRow = rowIndex === gameState.guesses.length && gameState.gameStatus === "playing"
@@ -499,7 +532,7 @@ export default function MedicalWordle() {
                   <div
                     key={colIndex}
                     className={`
-                      w-10 h-10 sm:w-12 sm:h-12 border-2 rounded flex items-center justify-center font-bold text-base sm:text-lg
+                      border-2 rounded flex items-center justify-center font-bold
                       transition-all duration-300 hover:scale-105
                       ${
                         status === "correct"
@@ -513,7 +546,14 @@ export default function MedicalWordle() {
                                 : "border-border"
                       }
                     `}
-                    style={isRevealed ? { animationDelay: `${colIndex * 100}ms` } : {}}
+                    style={{
+                      width: `calc((100vw - 2rem - ${(gameState.currentWord.length || 5) * 0.25}rem) / ${gameState.currentWord.length || 5})`,
+                      maxWidth: '3rem',
+                      minWidth: '2.5rem',
+                      height: '3rem',
+                      fontSize: `clamp(0.75rem, calc((100vw - 2rem - ${(gameState.currentWord.length || 5) * 0.25}rem) / ${gameState.currentWord.length || 5} * 0.4), 1.125rem)`,
+                      ...(isRevealed ? { animationDelay: `${colIndex * 100}ms` } : {})
+                    }}
                   >
                     {letter}
                   </div>
@@ -554,11 +594,21 @@ export default function MedicalWordle() {
         )}
 
         {/* Virtual Keyboard */}
-        <div className="space-y-1 sm:space-y-2">
+        <div className="space-y-1 sm:space-y-2 w-full">
           {["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"].map((row, rowIndex) => (
-            <div key={rowIndex} className="flex gap-0.5 sm:gap-1 justify-center">
+            <div key={rowIndex} className="flex gap-0.5 sm:gap-1 justify-center w-full">
               {rowIndex === 2 && (
-                <Button variant="outline" size="sm" onClick={() => handleKeyPress("ENTER")} className="px-2 sm:px-3 hover:scale-105 transition-all duration-200 text-xs">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleKeyPress("ENTER")} 
+                  className="px-2 sm:px-3 hover:scale-105 transition-all duration-200 text-xs"
+                  style={{
+                    width: 'calc((100vw - 2rem - 26 * 0.25rem) / 26 * 1.5)',
+                    maxWidth: '4rem',
+                    minWidth: '3rem'
+                  }}
+                >
                   ENTER
                 </Button>
               )}
@@ -571,7 +621,7 @@ export default function MedicalWordle() {
                     size="sm"
                     onClick={() => handleKeyPress(letter)}
                     className={`
-                      w-7 h-7 sm:w-8 sm:h-8 p-0 text-xs font-bold transition-all duration-200 hover:scale-110
+                      p-0 text-xs font-bold transition-all duration-200 hover:scale-110
                       ${
                         keyStatus === "correct"
                           ? "bg-green-500 text-white border-green-500"
@@ -582,13 +632,29 @@ export default function MedicalWordle() {
                               : ""
                       }
                     `}
+                    style={{
+                      width: 'calc((100vw - 2rem - 26 * 0.25rem) / 26)',
+                      maxWidth: '2.5rem',
+                      minWidth: '2rem',
+                      height: '2.5rem'
+                    }}
                   >
                     {letter}
                   </Button>
                 )
               })}
               {rowIndex === 2 && (
-                <Button variant="outline" size="sm" onClick={() => handleKeyPress("BACKSPACE")} className="px-2 sm:px-3 hover:scale-105 transition-all duration-200 text-xs">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleKeyPress("BACKSPACE")} 
+                  className="px-2 sm:px-3 hover:scale-105 transition-all duration-200 text-xs"
+                  style={{
+                    width: 'calc((100vw - 2rem - 26 * 0.25rem) / 26 * 1.5)',
+                    maxWidth: '4rem',
+                    minWidth: '3rem'
+                  }}
+                >
                   ⌫
                 </Button>
               )}
