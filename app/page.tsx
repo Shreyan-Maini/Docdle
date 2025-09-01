@@ -79,6 +79,7 @@ const FALLBACK_WORDS: MedicalWordBank = {
 
 // ---------- Component ----------
 export default function MedicalWordle() {
+  console.log("MedicalWordle component rendered")
   const [bank, setBank] = useState<MedicalWordBank | null>(null)
 
   const [gameState, setGameState] = useState<GameState>({
@@ -95,25 +96,100 @@ export default function MedicalWordle() {
   const [revealedLetters, setRevealedLetters] = useState<Set<string>>(new Set())
   const [shakeRow, setShakeRow] = useState<number | null>(null)
 
+  // Monitor bank state changes
+  useEffect(() => {
+    console.log("Bank state changed:", bank ? "loaded" : "null")
+    if (bank) {
+      console.log("Bank keys:", Object.keys(bank))
+      console.log("Sample words:", bank.cardiovascular?.slice(0, 3))
+    }
+  }, [bank])
+
   // Load external wordbank from /medical-words.json (place this file in /public)
   useEffect(() => {
-    const load = async () => {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') {
+      console.log("Not in browser environment, skipping fetch")
+      return
+    }
+    
+    console.log("useEffect triggered - starting to load medical words")
+    
+    const load = async (retryCount = 0) => {
       try {
-        const res = await fetch("/medical-words.json", { cache: "no-store" })
-        if (!res.ok) throw new Error("not found")
+        console.log(`Attempting to load medical-words.json (attempt ${retryCount + 1})...`)
+        console.log("Current URL:", window.location.href)
+        console.log("Fetching from:", "/medical-words.json")
+        
+        // Simple fetch call
+        const res = await fetch("/medical-words.json", { 
+          cache: "no-store"
+        })
+        console.log("Fetch response:", res.status, res.statusText, res.headers.get('content-type'))
+        
+        if (!res.ok) {
+          console.error("Response not ok:", res.status, res.statusText)
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+        }
+        
         const data: MedicalWordBank = await res.json()
-        setBank(data)
-      } catch {
+        console.log("Successfully loaded medical words:", data)
+        console.log("Data keys:", Object.keys(data))
+        console.log("Sample cardiovascular words:", data.cardiovascular?.slice(0, 3))
+        
+        // Validate that we have some data
+        if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+          // Check if all required keys exist
+          const requiredKeys = ['cardiovascular', 'respiratory', 'nervous', 'skeletal', 'muscular']
+          const hasAllKeys = requiredKeys.every(key => key in data && Array.isArray(data[key as keyof MedicalWordBank]))
+          
+          if (hasAllKeys) {
+            console.log("Setting bank with loaded data")
+            console.log("Data before setBank:", data)
+            setBank(data)
+            console.log("setBank called")
+            return // Success, exit early
+          } else {
+            console.error("Missing required keys:", requiredKeys.filter(key => !(key in data && Array.isArray(data[key as keyof MedicalWordBank]))))
+            throw new Error("Invalid data structure - missing required keys")
+          }
+        } else {
+          throw new Error("Empty or invalid data received")
+        }
+      } catch (error) {
+        console.warn(`Failed to load medical-words.json (attempt ${retryCount + 1}):`, error)
+        
+        // Retry up to 3 times with exponential backoff
+        if (retryCount < 2) {
+          const delay = Math.pow(2, retryCount) * 500 // 500ms, 1000ms, 2000ms
+          console.log(`Retrying in ${delay}ms...`)
+          setTimeout(() => load(retryCount + 1), delay)
+          return
+        }
+        
+        // All retries failed, use fallback
+        console.log("All retries failed, setting bank with fallback words")
         setBank(FALLBACK_WORDS)
       }
     }
+    
+    // Start loading immediately
     load()
+    
+    // Cleanup function
+    return () => {
+      console.log("useEffect cleanup - component unmounting")
+    }
   }, [])
 
   // Initialize game with selected body system
   const startNewGame = (system: BodySystem) => {
+    console.log("startNewGame called with system:", system)
+    console.log("Current bank:", bank ? "loaded" : "fallback")
     const source = bank ?? FALLBACK_WORDS
+    console.log("Using source:", source === bank ? "loaded bank" : "fallback words")
     const words = source[system]
+    console.log("Words for system:", words?.length || 0)
     const randomWord = words[Math.floor(Math.random() * words.length)]
 
     setGameState({
@@ -256,10 +332,15 @@ export default function MedicalWordle() {
   }
 
   // --------- UI ---------
+  console.log("Component render - bank state:", bank ? "loaded" : "null")
+  
   if (!bank) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
-        <Card className="p-6">Loading word bank…</Card>
+        <Card className="p-6">
+          <div>Loading word bank…</div>
+          <div className="text-sm text-muted-foreground mt-2">Check console for debug info</div>
+        </Card>
       </div>
     )
   }
@@ -389,9 +470,9 @@ export default function MedicalWordle() {
         )}
 
         {/* Game Grid */}
-        <div className="grid gap-2 mb-6">
+        <div className="flex flex-col items-center gap-2 mb-6">
           {Array.from({ length: 6 }, (_, rowIndex) => (
-            <div key={rowIndex} className={`flex gap-2 justify-center ${shakeRow === rowIndex ? "animate-bounce" : ""}`}>
+            <div key={rowIndex} className={`flex gap-2 ${shakeRow === rowIndex ? "animate-bounce" : ""}`}>
               {Array.from({ length: gameState.currentWord.length || 5 }, (_, colIndex) => {
                 const guess = gameState.guesses[rowIndex]
                 const isCurrentRow = rowIndex === gameState.guesses.length && gameState.gameStatus === "playing"
