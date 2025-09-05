@@ -48,6 +48,7 @@ const FALLBACK_WORDS: MedicalWordBank = {
     { word: "VALVE", hint: "Controls blood flow direction", difficulty: "easy", educational: "Cardiac valves ensure unidirectional blood flow. The atrioventricular valves (tricuspid and mitral) prevent backflow during systole, while semilunar valves (pulmonary and aortic) prevent backflow during diastole. Valve dysfunction can lead to heart failure." },
     { word: "SYSTOLE", hint: "Contraction phase of heart", difficulty: "hard", educational: "Systole is the contraction phase of the cardiac cycle. Ventricular systole ejects blood into the pulmonary and systemic circulations. The first heart sound (S1) occurs when the atrioventricular valves close at the beginning of systole." },
     { word: "MURMUR", hint: "Abnormal heart sound", difficulty: "medium", educational: "Heart murmurs are caused by turbulent blood flow through the heart. They can be innocent (physiological) or pathological. Murmurs are classified by timing (systolic/diastolic), location, radiation, and intensity (grade 1-6)." },
+    { word: "AVNODE", hint: "Conduction node between atria and ventricles", difficulty: "hard", educational: "The atrioventricular node (AV node) is a specialized cardiac conduction tissue located in the lower portion of the right atrium. It delays electrical impulses from the atria to the ventricles, allowing for proper ventricular filling. The AV node is the backup pacemaker of the heart, firing at 40-60 bpm if the SA node fails." },
   ],
   respiratory: [
     { word: "LUNGS", hint: "Paired organs for gas exchange", difficulty: "easy", educational: "The lungs are paired organs responsible for gas exchange. The right lung has three lobes, the left has two. They contain approximately 300 million alveoli, providing a surface area of about 70 square meters for gas exchange." },
@@ -98,6 +99,7 @@ export default function MedicalWordle() {
   const [showHint, setShowHint] = useState<boolean>(true)
   const [revealedLetters, setRevealedLetters] = useState<Set<string>>(new Set())
   const [shakeRow, setShakeRow] = useState<number | null>(null)
+  const [aiEducationalContent, setAiEducationalContent] = useState<string>("")
 
   // Monitor bank state changes
   useEffect(() => {
@@ -185,6 +187,50 @@ export default function MedicalWordle() {
     }
   }, [])
 
+  // Generate AI medical insight for any word
+  const generateMedicalInsight = async (word: string, system: BodySystem, hint?: string) => {
+    try {
+      const systemName = system.replace(/([A-Z])/g, " $1").trim().toLowerCase()
+      const prompt = `Generate a concise, professional medical insight for the term "${word}" in the ${systemName} system. ${hint ? `Hint: ${hint}` : ''} Provide 1-2 sentences of educational content suitable for medical students and healthcare professionals. Focus on anatomical, physiological, or clinical significance.`
+      
+      // For now, we'll use a simple fallback since we can't make actual API calls
+      // In a real implementation, you'd call an AI service like OpenAI, Claude, etc.
+      const fallbackInsights: Record<string, string> = {
+        'AVNODE': 'The atrioventricular node (AV node) is a specialized cardiac conduction tissue located in the lower portion of the right atrium. It delays electrical impulses from the atria to the ventricles, allowing for proper ventricular filling. The AV node is the backup pacemaker of the heart, firing at 40-60 bpm if the SA node fails.',
+        'CARDIOMYOPATHY': 'Cardiomyopathy refers to diseases of the heart muscle that affect its structure and function. It can be classified as dilated, hypertrophic, or restrictive, each with distinct pathophysiological mechanisms and clinical presentations.',
+        'GASTROENTEROLOGY': 'Gastroenterology is the medical specialty focused on the digestive system and its disorders. It encompasses the esophagus, stomach, small intestine, colon, rectum, liver, gallbladder, and pancreas.',
+        'NEUROLOGY': 'Neurology is the branch of medicine dealing with disorders of the nervous system, including the brain, spinal cord, and peripheral nerves. It covers conditions ranging from stroke and epilepsy to neurodegenerative diseases.',
+        'PULMONOLOGY': 'Pulmonology is the medical specialty concerned with diseases of the respiratory system, including the lungs, airways, and chest wall. It encompasses conditions like asthma, COPD, pneumonia, and lung cancer.',
+        'ORTHOPEDICS': 'Orthopedics is the medical specialty focused on the musculoskeletal system, including bones, joints, muscles, ligaments, and tendons. It covers both surgical and non-surgical treatment of musculoskeletal disorders.',
+        'DERMATOLOGY': 'Dermatology is the branch of medicine dealing with skin, hair, and nail disorders. It encompasses both medical and surgical aspects of skin disease, including cosmetic dermatology and dermatopathology.',
+        'ONCOLOGY': 'Oncology is the medical specialty focused on the diagnosis and treatment of cancer. It includes medical oncology (chemotherapy), radiation oncology, and surgical oncology, with a multidisciplinary approach to cancer care.',
+        'ENDOCRINOLOGY': 'Endocrinology is the branch of medicine dealing with disorders of the endocrine system, including diabetes, thyroid disease, and adrenal disorders. It focuses on hormone regulation and metabolic processes.',
+        'RHEUMATOLOGY': 'Rheumatology is the medical specialty focused on autoimmune and inflammatory disorders affecting joints, muscles, and connective tissue. It includes conditions like rheumatoid arthritis, lupus, and vasculitis.'
+      }
+      
+      // Return a specific insight if available, otherwise generate a generic one
+      const specificInsight = fallbackInsights[word.toUpperCase()]
+      if (specificInsight) {
+        setAiEducationalContent(specificInsight)
+        return
+      }
+      
+      // Generic insight based on system
+      const genericInsights: Record<BodySystem, string> = {
+        cardiovascular: `"${word}" is a cardiovascular term related to the heart and blood vessels. The cardiovascular system is responsible for circulating blood throughout the body, delivering oxygen and nutrients to tissues while removing waste products.`,
+        respiratory: `"${word}" is a respiratory term related to the lungs and breathing. The respiratory system facilitates gas exchange between the body and environment, ensuring adequate oxygen supply and carbon dioxide removal.`,
+        nervous: `"${word}" is a neurological term related to the nervous system. The nervous system coordinates body functions through electrical and chemical signals, including the brain, spinal cord, and peripheral nerves.`,
+        skeletal: `"${word}" is a skeletal term related to bones and joints. The skeletal system provides structural support, protects vital organs, and facilitates movement through its interaction with muscles.`,
+        muscular: `"${word}" is a muscular term related to muscle tissue and function. The muscular system enables movement, maintains posture, and generates heat through muscle contraction and relaxation.`
+      }
+      
+      setAiEducationalContent(genericInsights[system] || `"${word}" is an important medical term in the ${systemName} system. Understanding medical terminology is crucial for healthcare professionals and students.`)
+    } catch (error) {
+      console.error('Error generating medical insight:', error)
+      setAiEducationalContent(`"${word}" is an important medical term in the ${system.replace(/([A-Z])/g, " $1").trim().toLowerCase()} system. Understanding medical terminology is crucial for healthcare professionals and students.`)
+    }
+  }
+
   // Initialize game with selected body system
   const startNewGame = (system: BodySystem) => {
     console.log("startNewGame called with system:", system)
@@ -208,6 +254,10 @@ export default function MedicalWordle() {
     setShowHint(true)
     setRevealedLetters(new Set())
     setShakeRow(null)
+    setAiEducationalContent("")
+    
+    // Generate AI medical insight for the word
+    generateMedicalInsight(randomWord.word.toUpperCase(), system, randomWord.hint)
   }
 
   // Handle key input
@@ -524,7 +574,7 @@ export default function MedicalWordle() {
         {/* Game Grid */}
         <div className="flex flex-col items-center gap-1 sm:gap-2 mb-4 sm:mb-6 w-full px-2">
           {Array.from({ length: 6 }, (_, rowIndex) => (
-            <div key={rowIndex} className={`flex gap-1 sm:gap-2 justify-center w-full max-w-sm ${shakeRow === rowIndex ? "animate-bounce" : ""}`}>
+            <div key={rowIndex} className={`flex gap-1 sm:gap-2 justify-center w-full ${shakeRow === rowIndex ? "animate-bounce" : ""}`} style={{ maxWidth: gameState.currentWord.length > 8 ? '100%' : '24rem' }}>
               {Array.from({ length: gameState.currentWord.length || 5 }, (_, colIndex) => {
                 const guess = gameState.guesses[rowIndex]
                 const isCurrentRow = rowIndex === gameState.guesses.length && gameState.gameStatus === "playing"
@@ -552,9 +602,9 @@ export default function MedicalWordle() {
                     `}
                     style={{
                       aspectRatio: '1',
-                      minHeight: '2.5rem',
-                      maxHeight: '3.5rem',
-                      fontSize: 'clamp(0.875rem, 4vw, 1.25rem)',
+                      minHeight: gameState.currentWord.length > 8 ? '2rem' : '2.5rem',
+                      maxHeight: gameState.currentWord.length > 8 ? '2.5rem' : '3.5rem',
+                      fontSize: gameState.currentWord.length > 8 ? 'clamp(0.75rem, 3vw, 1rem)' : 'clamp(0.875rem, 4vw, 1.25rem)',
                       ...(isRevealed ? { animationDelay: `${colIndex * 100}ms` } : {})
                     }}
                   >
@@ -565,6 +615,7 @@ export default function MedicalWordle() {
             </div>
           ))}
         </div>
+
 
         {/* Game Status */}
         {gameState.gameStatus !== "playing" && (
@@ -585,24 +636,22 @@ export default function MedicalWordle() {
               </div>
             )}
             
-            {/* Educational Content */}
-            {gameState.currentEducational && (
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg animate-in fade-in-50 delay-300">
-                <h4 className="font-semibold text-sm sm:text-base mb-3 text-blue-800 flex items-center gap-2">
-                  <span className="text-lg">📚</span>
-                  Medical Insight
-                </h4>
-                <p className="text-xs sm:text-sm text-blue-700 leading-relaxed">
-                  {gameState.currentEducational}
-                </p>
-              </div>
-            )}
+            {/* Medical Insight - Show only after game is over */}
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg animate-in fade-in-50 delay-300">
+              <h4 className="font-semibold text-sm sm:text-base mb-3 text-blue-800 flex items-center gap-2">
+                <span className="text-lg">📚</span>
+                Medical Insight
+              </h4>
+              <p className="text-xs sm:text-sm text-blue-700 leading-relaxed">
+                {gameState.currentEducational || aiEducationalContent || `"${gameState.currentWord}" is an important medical term in the ${gameState.selectedSystem?.replace(/([A-Z])/g, " $1").trim().toLowerCase()} system. Understanding medical terminology is crucial for healthcare professionals and students.`}
+              </p>
+            </div>
             
             <div className="flex gap-2 justify-center mt-4">
-              <Button onClick={() => startNewGame(gameState.selectedSystem!)} className="hover:scale-105 transition-transform duration-200 animate-in fade-in-50 delay-400 text-sm">
+              <Button onClick={() => startNewGame(gameState.selectedSystem!)} className="hover:scale-105 transition-transform duration-200 animate-in fade-in-50 delay-300 text-sm">
                 Play Again
               </Button>
-              <Button variant="outline" onClick={shareResults} className="hover:scale-105 transition-transform duration-200 animate-in fade-in-50 delay-400 bg-transparent text-sm">
+              <Button variant="outline" onClick={shareResults} className="hover:scale-105 transition-transform duration-200 animate-in fade-in-50 delay-300 bg-transparent text-sm">
                 <Share2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                 Share
               </Button>
