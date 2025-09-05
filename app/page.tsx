@@ -15,6 +15,7 @@ type WordEntry = {
   word: string
   hint?: string
   difficulty: Difficulty
+  educational?: string
 }
 
 type MedicalWordBank = {
@@ -31,6 +32,7 @@ interface GameState {
   currentWord: string
   currentHint: string
   currentDifficulty: Difficulty
+  currentEducational: string
   guesses: string[]
   currentGuess: string
   gameStatus: "playing" | "won" | "lost"
@@ -41,39 +43,39 @@ interface GameState {
 // Only used if /medical-words.json is not found (e.g., first run).
 const FALLBACK_WORDS: MedicalWordBank = {
   cardiovascular: [
-    { word: "HEART", hint: "Muscular organ that pumps blood", difficulty: "easy" },
-    { word: "AORTA", hint: "Largest artery in the body", difficulty: "medium" },
-    { word: "VALVE", hint: "Controls blood flow direction", difficulty: "easy" },
-    { word: "SYSTOLE", hint: "Contraction phase of heart", difficulty: "hard" },
-    { word: "MURMUR", hint: "Abnormal heart sound", difficulty: "medium" },
+    { word: "HEART", hint: "Muscular organ that pumps blood", difficulty: "easy", educational: "The heart is a four-chambered organ that maintains systemic circulation. The right side pumps deoxygenated blood to the lungs, while the left side pumps oxygenated blood to the body. Cardiac output averages 5-6 liters per minute at rest." },
+    { word: "AORTA", hint: "Largest artery in the body", difficulty: "medium", educational: "The aorta is the main conduit for oxygenated blood from the left ventricle. It has three layers: intima, media, and adventitia. The ascending aorta gives rise to coronary arteries, while the arch supplies the head and upper extremities." },
+    { word: "VALVE", hint: "Controls blood flow direction", difficulty: "easy", educational: "Cardiac valves ensure unidirectional blood flow. The atrioventricular valves (tricuspid and mitral) prevent backflow during systole, while semilunar valves (pulmonary and aortic) prevent backflow during diastole. Valve dysfunction can lead to heart failure." },
+    { word: "SYSTOLE", hint: "Contraction phase of heart", difficulty: "hard", educational: "Systole is the contraction phase of the cardiac cycle. Ventricular systole ejects blood into the pulmonary and systemic circulations. The first heart sound (S1) occurs when the atrioventricular valves close at the beginning of systole." },
+    { word: "MURMUR", hint: "Abnormal heart sound", difficulty: "medium", educational: "Heart murmurs are caused by turbulent blood flow through the heart. They can be innocent (physiological) or pathological. Murmurs are classified by timing (systolic/diastolic), location, radiation, and intensity (grade 1-6)." },
   ],
   respiratory: [
-    { word: "LUNGS", hint: "Paired organs for gas exchange", difficulty: "easy" },
-    { word: "ALVEOLI", hint: "Tiny air sacs where gas exchange occurs", difficulty: "medium" },
-    { word: "BRONCHI", hint: "Main airways leading to lungs", difficulty: "medium" },
-    { word: "DIAPHRAGM", hint: "Primary breathing muscle", difficulty: "hard" },
-    { word: "ASTHMA", hint: "Chronic airway inflammation", difficulty: "easy" },
+    { word: "LUNGS", hint: "Paired organs for gas exchange", difficulty: "easy", educational: "The lungs are paired organs responsible for gas exchange. The right lung has three lobes, the left has two. They contain approximately 300 million alveoli, providing a surface area of about 70 square meters for gas exchange." },
+    { word: "ALVEOLI", hint: "Tiny air sacs where gas exchange occurs", difficulty: "medium", educational: "Alveoli are the functional units of gas exchange, surrounded by pulmonary capillaries. They contain type I pneumocytes for gas exchange and type II pneumocytes that produce surfactant, which reduces surface tension and prevents alveolar collapse." },
+    { word: "BRONCHI", hint: "Main airways leading to lungs", difficulty: "medium", educational: "The bronchi are the main airways that branch from the trachea. The right main bronchus is shorter and more vertical than the left. They continue branching into bronchioles, eventually reaching terminal bronchioles and respiratory bronchioles." },
+    { word: "DIAPHRAGM", hint: "Primary breathing muscle", difficulty: "hard", educational: "The diaphragm is the primary muscle of inspiration. When it contracts, it flattens and increases thoracic volume, creating negative pressure that draws air into the lungs. It's innervated by the phrenic nerve (C3-C5) and separates the thoracic and abdominal cavities." },
+    { word: "ASTHMA", hint: "Chronic airway inflammation", difficulty: "easy", educational: "Asthma is a chronic inflammatory airway disease characterized by reversible airway obstruction, hyperresponsiveness, and inflammation. Triggers include allergens, exercise, and irritants. Treatment involves bronchodilators and anti-inflammatory medications." },
   ],
   nervous: [
-    { word: "BRAIN", hint: "Control center of the nervous system", difficulty: "easy" },
-    { word: "NEURON", hint: "Basic nerve cell", difficulty: "easy" },
-    { word: "SYNAPSE", hint: "Junction between neurons", difficulty: "medium" },
-    { word: "MYELIN", hint: "Insulating sheath on axons", difficulty: "medium" },
-    { word: "AMYGDALA", hint: "Emotion processing center", difficulty: "hard" },
+    { word: "BRAIN", hint: "Control center of the nervous system", difficulty: "easy", educational: "The brain is the central processing unit of the nervous system, containing approximately 86 billion neurons. It's divided into the cerebrum, cerebellum, and brainstem. The brain consumes about 20% of the body's oxygen and glucose despite being only 2% of body weight." },
+    { word: "NEURON", hint: "Basic nerve cell", difficulty: "easy", educational: "Neurons are the basic functional units of the nervous system. They consist of a cell body (soma), dendrites for receiving signals, and an axon for transmitting signals. Neurons communicate through electrical impulses and chemical neurotransmitters at synapses." },
+    { word: "SYNAPSE", hint: "Junction between neurons", difficulty: "medium", educational: "Synapses are specialized junctions where neurons communicate. They consist of a presynaptic terminal, synaptic cleft, and postsynaptic membrane. Neurotransmitters are released from vesicles in the presynaptic terminal and bind to receptors on the postsynaptic membrane." },
+    { word: "MYELIN", hint: "Insulating sheath on axons", difficulty: "medium", educational: "Myelin is a fatty substance that forms an insulating sheath around axons, dramatically increasing conduction velocity. It's produced by oligodendrocytes in the CNS and Schwann cells in the PNS. Demyelination diseases like multiple sclerosis disrupt nerve conduction." },
+    { word: "AMYGDALA", hint: "Emotion processing center", difficulty: "hard", educational: "The amygdala is part of the limbic system and plays a crucial role in emotional processing, particularly fear responses and emotional memory formation. It's located in the temporal lobe and has connections to the hippocampus, prefrontal cortex, and hypothalamus." },
   ],
   skeletal: [
-    { word: "BONES", hint: "Hard structures of the skeleton", difficulty: "easy" },
-    { word: "FEMUR", hint: "Longest bone in body", difficulty: "easy" },
-    { word: "OSTEON", hint: "Basic unit of compact bone", difficulty: "hard" },
-    { word: "LIGAMENT", hint: "Connects bone to bone", difficulty: "medium" },
-    { word: "PATELLA", hint: "Kneecap", difficulty: "easy" },
+    { word: "BONES", hint: "Hard structures of the skeleton", difficulty: "easy", educational: "Bones are living organs composed of mineralized connective tissue. They provide structural support, protect vital organs, store calcium and phosphorus, and house bone marrow for hematopoiesis. The adult skeleton contains 206 bones, while infants have approximately 270." },
+    { word: "FEMUR", hint: "Longest bone in body", difficulty: "easy", educational: "The femur is the longest and strongest bone in the human body. It articulates with the acetabulum proximally and the tibia distally. The femoral head is supplied by the medial and lateral circumflex arteries, making it vulnerable to avascular necrosis." },
+    { word: "OSTEON", hint: "Basic unit of compact bone", difficulty: "hard", educational: "Osteons are the basic structural units of compact bone, consisting of concentric lamellae surrounding a central canal containing blood vessels and nerves. They run parallel to the long axis of the bone and provide strength and resistance to bending forces." },
+    { word: "LIGAMENT", hint: "Connects bone to bone", difficulty: "medium", educational: "Ligaments are dense, fibrous connective tissues that connect bones to other bones, providing joint stability and limiting excessive movement. They consist primarily of collagen fibers arranged in parallel bundles. Unlike tendons, they have limited blood supply, affecting healing capacity." },
+    { word: "PATELLA", hint: "Kneecap", difficulty: "easy", educational: "The patella is a sesamoid bone embedded within the quadriceps tendon. It acts as a pulley, increasing the mechanical advantage of the quadriceps muscle by changing the angle of pull. It articulates with the femoral trochlea and protects the knee joint." },
   ],
   muscular: [
-    { word: "MUSCLE", hint: "Contracts to produce movement", difficulty: "easy" },
-    { word: "BICEPS", hint: "Anterior upper arm muscle", difficulty: "easy" },
-    { word: "SARCOMERE", hint: "Contractile unit of muscle", difficulty: "hard" },
-    { word: "TENDON", hint: "Connects muscle to bone", difficulty: "easy" },
-    { word: "MYOSIN", hint: "Thick filament protein", difficulty: "medium" },
+    { word: "MUSCLE", hint: "Contracts to produce movement", difficulty: "easy", educational: "Muscles are contractile tissues that generate force and movement. There are three types: skeletal (voluntary, striated), cardiac (involuntary, striated), and smooth (involuntary, non-striated). Skeletal muscles are attached to bones via tendons and work in antagonistic pairs." },
+    { word: "BICEPS", hint: "Anterior upper arm muscle", difficulty: "easy", educational: "The biceps brachii is a two-headed muscle in the anterior compartment of the arm. Both heads originate from the scapula and insert on the radial tuberosity. It flexes the elbow and supinates the forearm, with the short head also assisting in shoulder flexion." },
+    { word: "SARCOMERE", hint: "Contractile unit of muscle", difficulty: "hard", educational: "The sarcomere is the basic contractile unit of striated muscle, defined as the region between two Z-lines. It contains overlapping actin and myosin filaments. Muscle contraction occurs when myosin heads bind to actin and pull the filaments past each other, shortening the sarcomere." },
+    { word: "TENDON", hint: "Connects muscle to bone", difficulty: "easy", educational: "Tendons are dense, fibrous connective tissues that connect muscles to bones, transmitting the force generated by muscle contraction to the skeleton. They consist primarily of parallel collagen fibers and have high tensile strength but limited elasticity. Tendon injuries often require prolonged healing." },
+    { word: "MYOSIN", hint: "Thick filament protein", difficulty: "medium", educational: "Myosin is a motor protein that forms the thick filaments in muscle sarcomeres. It has a globular head that binds to actin and uses ATP hydrolysis to generate the power stroke during muscle contraction. Myosin heads contain ATPase activity and are responsible for the sliding filament mechanism." },
   ],
 }
 
@@ -86,13 +88,14 @@ export default function MedicalWordle() {
     currentWord: "",
     currentHint: "",
     currentDifficulty: "easy",
+    currentEducational: "",
     guesses: [],
     currentGuess: "",
     gameStatus: "playing",
     selectedSystem: null,
   })
 
-  const [showHint, setShowHint] = useState<boolean>(false)
+  const [showHint, setShowHint] = useState<boolean>(true)
   const [revealedLetters, setRevealedLetters] = useState<Set<string>>(new Set())
   const [shakeRow, setShakeRow] = useState<number | null>(null)
 
@@ -196,12 +199,13 @@ export default function MedicalWordle() {
       currentWord: randomWord.word.toUpperCase(),
       currentHint: randomWord.hint ?? "",
       currentDifficulty: randomWord.difficulty,
+      currentEducational: randomWord.educational ?? "",
       guesses: [],
       currentGuess: "",
       gameStatus: "playing",
       selectedSystem: system,
     })
-    setShowHint(false)
+    setShowHint(true)
     setRevealedLetters(new Set())
     setShakeRow(null)
   }
@@ -288,7 +292,7 @@ export default function MedicalWordle() {
         if (guess[i] === letter) {
           const status = getLetterStatus(letter, i, guess)
           if (status === "correct") return "correct"
-          if (status === "present" && bestStatus !== "correct") bestStatus = "present"
+          if (status === "present" && !["correct", "present"].includes(bestStatus as string)) bestStatus = "present"
           if (status === "absent" && bestStatus === null) bestStatus = "absent"
         }
       }
@@ -518,9 +522,9 @@ export default function MedicalWordle() {
         )}
 
         {/* Game Grid */}
-        <div className="flex flex-col items-center gap-1 sm:gap-2 mb-4 sm:mb-6 w-full">
+        <div className="flex flex-col items-center gap-1 sm:gap-2 mb-4 sm:mb-6 w-full px-2">
           {Array.from({ length: 6 }, (_, rowIndex) => (
-            <div key={rowIndex} className={`flex gap-1 sm:gap-2 justify-center w-full ${shakeRow === rowIndex ? "animate-bounce" : ""}`}>
+            <div key={rowIndex} className={`flex gap-1 sm:gap-2 justify-center w-full max-w-sm ${shakeRow === rowIndex ? "animate-bounce" : ""}`}>
               {Array.from({ length: gameState.currentWord.length || 5 }, (_, colIndex) => {
                 const guess = gameState.guesses[rowIndex]
                 const isCurrentRow = rowIndex === gameState.guesses.length && gameState.gameStatus === "playing"
@@ -533,7 +537,7 @@ export default function MedicalWordle() {
                     key={colIndex}
                     className={`
                       border-2 rounded flex items-center justify-center font-bold
-                      transition-all duration-300 hover:scale-105
+                      transition-all duration-300 hover:scale-105 flex-1
                       ${
                         status === "correct"
                           ? "bg-green-500 text-white border-green-500 animate-in zoom-in-50"
@@ -547,11 +551,10 @@ export default function MedicalWordle() {
                       }
                     `}
                     style={{
-                      width: `calc((100vw - 2rem - ${(gameState.currentWord.length || 5) * 0.25}rem) / ${gameState.currentWord.length || 5})`,
-                      maxWidth: '3rem',
-                      minWidth: '2.5rem',
-                      height: '3rem',
-                      fontSize: `clamp(0.75rem, calc((100vw - 2rem - ${(gameState.currentWord.length || 5) * 0.25}rem) / ${gameState.currentWord.length || 5} * 0.4), 1.125rem)`,
+                      aspectRatio: '1',
+                      minHeight: '2.5rem',
+                      maxHeight: '3.5rem',
+                      fontSize: 'clamp(0.875rem, 4vw, 1.25rem)',
                       ...(isRevealed ? { animationDelay: `${colIndex * 100}ms` } : {})
                     }}
                   >
@@ -581,11 +584,25 @@ export default function MedicalWordle() {
                 </p>
               </div>
             )}
-            <div className="flex gap-2 justify-center mt-3">
-              <Button onClick={() => startNewGame(gameState.selectedSystem!)} className="hover:scale-105 transition-transform duration-200 animate-in fade-in-50 delay-300 text-sm">
+            
+            {/* Educational Content */}
+            {gameState.currentEducational && (
+              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg animate-in fade-in-50 delay-300">
+                <h4 className="font-semibold text-sm sm:text-base mb-3 text-blue-800 flex items-center gap-2">
+                  <span className="text-lg">📚</span>
+                  Medical Insight
+                </h4>
+                <p className="text-xs sm:text-sm text-blue-700 leading-relaxed">
+                  {gameState.currentEducational}
+                </p>
+              </div>
+            )}
+            
+            <div className="flex gap-2 justify-center mt-4">
+              <Button onClick={() => startNewGame(gameState.selectedSystem!)} className="hover:scale-105 transition-transform duration-200 animate-in fade-in-50 delay-400 text-sm">
                 Play Again
               </Button>
-              <Button variant="outline" onClick={shareResults} className="hover:scale-105 transition-transform duration-200 animate-in fade-in-50 delay-300 bg-transparent text-sm">
+              <Button variant="outline" onClick={shareResults} className="hover:scale-105 transition-transform duration-200 animate-in fade-in-50 delay-400 bg-transparent text-sm">
                 <Share2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                 Share
               </Button>
@@ -594,19 +611,22 @@ export default function MedicalWordle() {
         )}
 
         {/* Virtual Keyboard */}
-        <div className="space-y-1 sm:space-y-2 w-full">
+        <div className="space-y-1 sm:space-y-2 w-full px-2">
           {["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"].map((row, rowIndex) => (
-            <div key={rowIndex} className="flex gap-0.5 sm:gap-1 justify-center w-full">
+            <div key={rowIndex} className="flex gap-1 sm:gap-1.5 justify-center w-full max-w-lg mx-auto">
               {rowIndex === 2 && (
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={() => handleKeyPress("ENTER")} 
-                  className="px-2 sm:px-3 hover:scale-105 transition-all duration-200 text-xs"
+                  className={`px-2 sm:px-3 hover:scale-105 transition-all duration-200 text-xs font-bold ${
+                    gameState.currentGuess.length === gameState.currentWord.length && gameState.gameStatus === "playing"
+                      ? "bg-blue-500 text-white border-blue-500 hover:bg-blue-600"
+                      : ""
+                  }`}
                   style={{
-                    width: 'calc((100vw - 2rem - 26 * 0.25rem) / 26 * 1.5)',
-                    maxWidth: '4rem',
-                    minWidth: '3rem'
+                    minWidth: '3.5rem',
+                    height: '2.75rem'
                   }}
                 >
                   ENTER
@@ -621,7 +641,7 @@ export default function MedicalWordle() {
                     size="sm"
                     onClick={() => handleKeyPress(letter)}
                     className={`
-                      p-0 text-xs font-bold transition-all duration-200 hover:scale-110
+                      p-0 text-xs font-bold transition-all duration-200 hover:scale-110 flex-1
                       ${
                         keyStatus === "correct"
                           ? "bg-green-500 text-white border-green-500"
@@ -633,10 +653,8 @@ export default function MedicalWordle() {
                       }
                     `}
                     style={{
-                      width: 'calc((100vw - 2rem - 26 * 0.25rem) / 26)',
-                      maxWidth: '2.5rem',
-                      minWidth: '2rem',
-                      height: '2.5rem'
+                      height: '2.75rem',
+                      minWidth: '2rem'
                     }}
                   >
                     {letter}
@@ -648,18 +666,25 @@ export default function MedicalWordle() {
                   variant="outline" 
                   size="sm" 
                   onClick={() => handleKeyPress("BACKSPACE")} 
-                  className="px-2 sm:px-3 hover:scale-105 transition-all duration-200 text-xs"
+                  className="px-2 sm:px-3 hover:scale-105 transition-all duration-200 text-xs font-bold bg-red-50 hover:bg-red-100 border-red-200"
                   style={{
-                    width: 'calc((100vw - 2rem - 26 * 0.25rem) / 26 * 1.5)',
-                    maxWidth: '4rem',
-                    minWidth: '3rem'
+                    minWidth: '3.5rem',
+                    height: '2.75rem'
                   }}
+                  title="Delete letter"
                 >
-                  ⌫
+                  DEL
                 </Button>
               )}
             </div>
           ))}
+        </div>
+        
+        {/* Copyright */}
+        <div className="mt-8 pt-4 border-t border-border/50">
+          <p className="text-xs text-muted-foreground text-center">
+            © 2024 Docdle. Educational medical word game.
+          </p>
         </div>
       </div>
     </div>
